@@ -1,0 +1,25 @@
+---
+# Environment configuration
+environment: development
+deploy_environment: development
+
+# Company configuration
+company_name: "HomeLab"
+company_tagline: "🧠 AI Stuff 🍺"
+
+# System configuration
+data_base_dir: /data
+hostname: "homelab01"
+
+# Docker configuration
+docker_edition: 'ce'
+docker_package: "docker-{{ docker_edition }}"
+docker_package_state: present
+docker_service_state: started
+docker_service_enabled: true
+docker_user: ubuntu
+
+# Package update configuration
+update_cache: true
+cache_valid_time: 3600
+

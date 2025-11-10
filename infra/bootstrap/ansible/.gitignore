@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Ansible
+*.retry
+.vault_pass
+vault_pass
+*.log
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SSH keys
+*.pem
+*.key
+id_rsa*
+*.pub
+
+# Ansible Vault
+vault_pass
+*.vault
+

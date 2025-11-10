@@ -1,0 +1,10 @@
+---
+docker_edition: 'ce'
+docker_package: "docker-{{ docker_edition }}"
+docker_package_state: present
+docker_service_state: started
+docker_service_enabled: true
+docker_apt_release_channel: stable
+docker_apt_arch: amd64
+docker_user: ubuntu
+

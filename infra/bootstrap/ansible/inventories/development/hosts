@@ -1,0 +1,11 @@
+[all:vars]
+ansible_user=root
+ansible_ssh_pass=hom3l4b01
+ansible_ssh_extra_args='-o StrictHostKeyChecking=no'
+
+[servers]
+homelab01 ansible_host=192.168.178.4
+
+
+
+

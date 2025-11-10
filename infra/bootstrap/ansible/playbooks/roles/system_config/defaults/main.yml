@@ -1,0 +1,55 @@
+---
+# System configuration defaults
+# Note: SSH key paths are relative to project root (ansible will resolve from project root)
+system_users:
+  - name: smonaghan
+    ssh_key_file: "{{ inventory_dir }}/ssh_keys/smonaghan"
+    sudo_nopasswd: true
+  - name: dhudson
+    ssh_key_file: "{{ inventory_dir }}/ssh_keys/dhudson"
+    sudo_nopasswd: true
+
+# SSH configuration
+ssh_config:
+  PermitRootLogin: "no"
+  PasswordAuthentication: "no"
+  PubkeyAuthentication: "yes"
+  AuthorizedKeysFile: ".ssh/authorized_keys"
+
+# System settings
+timezone: UTC
+hostname: "poc.certlocker.io"
+
+# Optional: Sysctl settings for performance/security
+sysctl_settings:
+  net.ipv4.ip_forward: 0
+  net.ipv4.conf.all.send_redirects: 0
+  net.ipv4.conf.default.send_redirects: 0
+  net.ipv4.conf.all.accept_redirects: 0
+  net.ipv4.conf.default.accept_redirects: 0
+  net.ipv4.conf.all.secure_redirects: 0
+  net.ipv4.conf.default.secure_redirects: 0
+  net.ipv4.conf.all.log_martians: 1
+  net.ipv4.conf.default.log_martians: 1
+  vm.swappiness: 10
+
+# Optional: Ulimit settings
+ulimit_settings:
+  - domain: '*'
+    limit_type: soft
+    limit_item: nofile
+    value: 65536
+  - domain: '*'
+    limit_type: hard
+    limit_item: nofile
+    value: 65536
+
+# Optional: Install fail2ban for security
+install_fail2ban: true
+
+# MOTD configuration
+motd_enabled: true
+motd_script_name: certlocker
+company_name: "CertLocker.io"
+company_tagline: "🧠 Drink Beer 🍺"
+

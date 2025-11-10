@@ -1,0 +1,12 @@
+---
+- name: restart sshd
+  service:
+    name: ssh
+    state: restarted
+  become: yes
+
+- name: regenerate motd
+  command: /usr/bin/run-parts /etc/update-motd.d/
+  become: yes
+  changed_when: false
+

@@ -1,0 +1,13 @@
+---
+- name: Setup server with base packages, Docker, and updates
+  hosts: all
+  become: true
+  gather_facts: yes
+  
+  roles:
+    - system_config
+    - base_packages
+    - docker
+    - java
+    - update_packages
+

@@ -1,0 +1,137 @@
+---
+- name: Create users if they don't exist
+  user:
+    name: "{{ item.name }}"
+    state: present
+    shell: /bin/bash
+    create_home: yes
+    groups: sudo
+    append: yes
+  become: yes
+  loop: "{{ system_users }}"
+  when: item.name != ansible_user
+
+- name: Ensure .ssh directory exists for each user
+  file:
+    path: "/home/{{ item.name }}/.ssh"
+    state: directory
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: '0700'
+  become: yes
+  loop: "{{ system_users }}"
+  when: item.name != ansible_user
+
+- name: Copy SSH keys to authorized_keys
+  authorized_key:
+    user: "{{ item.name }}"
+    state: present
+    key: "{{ lookup('file', item.ssh_key_file) | trim }}"
+    exclusive: false
+  become: yes
+  loop: "{{ system_users }}"
+  when: item.name != ansible_user
+
+- name: Ensure sudoers directory exists
+  file:
+    path: /etc/sudoers.d
+    state: directory
+    mode: '0750'
+  become: yes
+
+- name: Configure passwordless sudo for users
+  lineinfile:
+    path: "/etc/sudoers.d/{{ item.name }}"
+    line: "{{ item.name }} ALL=(ALL) NOPASSWD: ALL"
+    state: present
+    mode: '0440'
+    validate: 'visudo -cf %s'
+    create: yes
+  become: yes
+  loop: "{{ system_users }}"
+  when: item.sudo_nopasswd | default(false)
+
+- name: Configure SSH settings
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^{{ item.key | regex_escape() }}\\s"
+    line: "{{ item.key }} {{ item.value }}"
+    backup: yes
+  become: yes
+  loop: "{{ ssh_config | dict2items }}"
+  notify: restart sshd
+
+- name: Ensure SSH service is running
+  service:
+    name: ssh
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Set hostname
+  hostname:
+    name: "{{ hostname }}"
+  become: yes
+  when: hostname is defined
+
+- name: Set timezone
+  timezone:
+    name: UTC
+  become: yes
+
+- name: Configure sysctl settings
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    sysctl_set: yes
+    reload: yes
+  become: yes
+  loop: "{{ sysctl_settings | default([]) | dict2items }}"
+  when: sysctl_settings is defined
+
+- name: Configure ulimits
+  pam_limits:
+    domain: "{{ item.domain }}"
+    limit_type: "{{ item.limit_type }}"
+    limit_item: "{{ item.limit_item }}"
+    value: "{{ item.value }}"
+  become: yes
+  loop: "{{ ulimit_settings | default([]) }}"
+  when: ulimit_settings is defined
+
+- name: Ensure fail2ban is installed (optional security)
+  apt:
+    name: fail2ban
+    state: present
+    update_cache: yes
+  become: yes
+  when: install_fail2ban | default(false)
+
+- name: Ensure fail2ban is running
+  service:
+    name: fail2ban
+    state: started
+    enabled: yes
+  become: yes
+  when: install_fail2ban | default(false)
+
+- name: Ensure update-motd.d directory exists
+  file:
+    path: /etc/update-motd.d
+    state: directory
+    mode: '0755'
+  become: yes
+  when: motd_enabled | default(true)
+
+- name: Deploy MOTD script
+  template:
+    src: motd.j2
+    dest: "/etc/update-motd.d/{{ motd_script_name }}"
+    mode: '0755'
+    owner: root
+    group: root
+  become: yes
+  when: motd_enabled | default(true)
+  notify: regenerate motd
+

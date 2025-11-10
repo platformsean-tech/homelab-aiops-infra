@@ -1,0 +1,39 @@
+---
+# Base packages to install
+base_packages:
+  - aptitude
+  - telnet
+  - htop
+  - lsof
+  - tcpdump
+  - ncdu
+  - strace
+  - libxml2
+  - iptables
+  - net-tools
+  - openssl
+  - dnsutils
+  - lvm2
+  - jq
+  - python-is-python3
+  - python3-pip
+  - mc
+  - git
+  - chrony
+  - nmap
+  - rsyslog
+  - speedtest-cli
+  - resolvconf
+  - figlet
+  - gcc
+  - build-essential
+  - curl
+  - wget
+
+# Python packages to install via pip
+pip_packages:
+  - lxml
+  - ansible
+  - docker
+  - netaddr
+

@@ -1,0 +1,85 @@
+---
+- name: Install curl and unzip (required for SDKMAN)
+  apt:
+    name:
+      - curl
+      - unzip
+      - zip
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Install OpenJDK 21 via apt
+  apt:
+    name: "openjdk-{{ java_version }}-jdk"
+    state: present
+    update_cache: yes
+  become: yes
+  register: java_install
+
+- name: Set JAVA_HOME for system
+  lineinfile:
+    path: /etc/environment
+    regexp: '^JAVA_HOME='
+    line: 'JAVA_HOME=/usr/lib/jvm/java-{{ java_version }}-openjdk-amd64'
+    state: present
+  become: yes
+  when: java_install.changed
+
+- name: Get list of users for SDKMAN installation
+  set_fact:
+    sdkman_users: "{{ (system_users | default([]) | map(attribute='name') | list) + [docker_user] | unique }}"
+
+- name: Install SDKMAN for users
+  shell: |
+    curl -s "https://get.sdkman.io" | bash
+  args:
+    creates: "/home/{{ item }}/.sdkman/bin/sdkman-init.sh"
+  become: yes
+  become_user: "{{ item }}"
+  loop: "{{ sdkman_users }}"
+  when: 
+    - sdkman_install | default(true)
+    - item != 'root'
+
+- name: Install Java 21 via SDKMAN for users
+  shell: |
+    source "/home/{{ item }}/.sdkman/bin/sdkman-init.sh"
+    sdk install java 21.0.1-tem
+    sdk default java 21.0.1-tem
+  args:
+    creates: "/home/{{ item }}/.sdkman/candidates/java/21.0.1-tem"
+    executable: /bin/bash
+  become: yes
+  become_user: "{{ item }}"
+  loop: "{{ sdkman_users }}"
+  when: 
+    - sdkman_install | default(true)
+    - item != 'root'
+  environment:
+    SDKMAN_DIR: "/home/{{ item }}/.sdkman"
+    HOME: "/home/{{ item }}"
+
+- name: Install SDKMAN for root
+  shell: |
+    curl -s "https://get.sdkman.io" | bash
+  args:
+    creates: "/root/.sdkman/bin/sdkman-init.sh"
+    executable: /bin/bash
+  become: yes
+  when: sdkman_install | default(true)
+
+- name: Install Java 21 via SDKMAN for root
+  shell: |
+    source "$HOME/.sdkman/bin/sdkman-init.sh"
+    sdk install java 21.0.1-tem
+    sdk default java 21.0.1-tem
+  args:
+    creates: "/root/.sdkman/candidates/java/21.0.1-tem"
+    executable: /bin/bash
+  become: yes
+  when: sdkman_install | default(true)
+  environment:
+    SDKMAN_DIR: "/root/.sdkman"
+    HOME: "/root"
+

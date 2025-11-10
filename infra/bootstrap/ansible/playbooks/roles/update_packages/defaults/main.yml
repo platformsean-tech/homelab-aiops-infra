@@ -1,0 +1,6 @@
+---
+update_cache: true
+cache_valid_time: 3600
+upgrade_retries: 2
+upgrade_delay: 5
+

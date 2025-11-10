@@ -1,0 +1,59 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: "{{ update_cache | default(true) }}"
+    cache_valid_time: "{{ cache_valid_time | default(3600) }}"
+  become: yes
+  register: apt_update_result
+  when: update_cache | default(true)
+
+- name: Get list of upgradable packages
+  shell: "apt list --upgradable 2>/dev/null | grep -v 'WARNING:' | grep '/' | awk -F/ '{print $1}' | sort -u"
+  become: yes
+  register: upgrade_packages
+  changed_when: false
+  failed_when: false
+
+- name: Validate and filter package names
+  set_fact:
+    packages_to_upgrade: "{{ upgrade_packages.stdout_lines | select('match', '^[a-zA-Z0-9][a-zA-Z0-9+.-]*$') | list }}"
+  when: upgrade_packages.stdout_lines is defined and upgrade_packages.stdout_lines | length > 0
+
+- name: Set empty package list when no packages available
+  set_fact:
+    packages_to_upgrade: []
+  when: upgrade_packages.stdout_lines is not defined or upgrade_packages.stdout_lines | length == 0
+
+- name: Log package upgrade information
+  debug:
+    msg: "Found {{ packages_to_upgrade | length }} packages available for upgrade: {{ packages_to_upgrade | join(', ') }}"
+  when: packages_to_upgrade | length > 0
+
+- name: Log no packages available
+  debug:
+    msg: "No packages available for upgrade"
+  when: packages_to_upgrade | length == 0
+
+- name: Upgrade apt packages
+  block:
+    - name: Perform safe upgrade
+      apt:
+        upgrade: safe
+        update_cache: yes
+      become: yes
+      register: upgrade_result
+      retries: "{{ upgrade_retries | default(2) }}"
+      delay: "{{ upgrade_delay | default(5) }}"
+  when: packages_to_upgrade | length > 0
+  rescue:
+    - name: Handle package upgrade failure
+      debug:
+        msg: "Package upgrade failed"
+
+- name: Upgrade summary
+  debug:
+    msg: |
+      Packages available for upgrade: {{ packages_to_upgrade | length }}
+      Upgrade status: {{ 'Completed' if upgrade_result.changed | default(false) else 'No changes needed' }}
+  when: packages_to_upgrade | length > 0 and upgrade_result is defined
+
