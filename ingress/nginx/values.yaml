@@ -1,0 +1,13 @@
+controller:
+  kind: DaemonSet
+  hostNetwork: true
+  service:
+    type: NodePort
+  admissionWebhooks:
+    enabled: true
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+defaultBackend:
+  enabled: true

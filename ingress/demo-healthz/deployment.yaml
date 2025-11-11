@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: healthz
+  namespace: ingress-nginx
+spec:
+  replicas: 1 
+  selector:
+    matchLabels: { app: healthz }
+  template:
+    metadata:
+      labels: { app: healthz }
+    spec:
+      containers:
+      - name: web
+        image: ghcr.io/nginxdemos/hello:plain-text
+        ports: [{containerPort: 80}]
