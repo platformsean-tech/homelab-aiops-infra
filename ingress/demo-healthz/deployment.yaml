@@ -13,5 +13,5 @@ spec:
     spec:
       containers:
       - name: web
-        image: ghcr.io/nginxdemos/hello:plain-text
+        image: nginxdemos/hello:plain-text
         ports: [{containerPort: 80}]
