@@ -1,0 +1,19 @@
+grafa:
+  adminUser: admin
+  adminPassword: admin1234
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      folder: /var/lib/grafana/dashboards/k8s
+prometheus:
+  service:
+    type: ClusterIP
+alertmanager:
+  service:
+    type: ClusterIP
+

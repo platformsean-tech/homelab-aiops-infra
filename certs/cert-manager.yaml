@@ -1,0 +1,9 @@
+# Minimal 
+apiVersion: v1
+kind: namespace
+metadata: { name: cert-manager }
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata: { name: cert-manager, namespace: cert-manager }
+---
