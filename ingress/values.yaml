@@ -1,0 +1,11 @@
+controller:
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+  extraArgs:
+    watch-namespace: ""
+  service:
+    type: NodePort
+    nodePorts:
+      http: 30080
+      https: 30443
+
