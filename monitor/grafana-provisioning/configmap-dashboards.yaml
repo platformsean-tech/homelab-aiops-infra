@@ -4,6 +4,7 @@ metadata:
   name: grafana-dashboards
   namespace: monitoring
   labels:
+    owner: platformsean
     grafana_dashboard: "1"
 data:
   k8s-cluster-dashboard.json: |
