@@ -4,6 +4,7 @@ metadata:
   name: grafana-datasources
   namespace: monitoring
   labels:
+    owner: seanie
     grafana_datasource: "1"
 data:
   datasources.yaml: |
