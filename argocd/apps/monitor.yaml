@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/platformsean-tech/homelab-aiops-infra.git
     targetRevision: main
-    path: monitor
+    path: monitoring
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
